@@ -19,7 +19,6 @@ $(function() {
             "quantity": 1,
         }
     }
-    console.log(products[0])
 
 	var done = false; // done var is used to keep a check whether the cart is empty or not
     
@@ -80,7 +79,7 @@ $(function() {
     	if (no_of_products) {
     		if (!done) { // to load the table heads on refresh of the page if (no_of_products>0)
     			var cart_head = $('#cartItemsHead');
-    			var head_string = "<tr><th>Product Name</th><th>Quantity</th><th>Amount</th><tr>";
+    			var head_string = "<tr><th>Product Name</th><th>Price</th><th>Quantity</th><th>Amount</th><tr>";
     			cart_head.append(head_string);
     			done = true;
     		}
@@ -97,6 +96,7 @@ $(function() {
     				var amount = cost*cartItem.quantity;
     				var delCart = "delCartItem";
     				var cartString = "<tr><td><button id=" + i + " class=" + "red" + " name=" + "delCartItem" + ">x</button><cname id=" + i + ">"+name+"</cname></td>";
+                    cartString += "<td><cprice id=" + i + ">" + cost + "</cprice></td>";
     				cartString += "<td><button id=" + i + " name=" + "cminus" + " class=" + "red" + ">-</button>";
     				cartString += "<cquant id=" + i + ">"+cartItem.quantity+"</cquant>";
     				cartString += "<button id=" + i + " name=" + "cplus" + " class=" + "green" +">+</button></td>";
