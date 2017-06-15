@@ -9,27 +9,35 @@ route.get('/', (req, res) => {
 
 });
 
-/*
-route.get('/products', (req, res) => {
+route.post('/addtocart', (req, res) => {
+    data.addToCart(req.body.product);
+    res.redirect('/myapi/mycart');
+});
 
-    data.getProducts().then((products) => {
-        res.send(products);
+
+route.get('/cartitems', (req, res) => {
+
+    data.getCart().then((cart) => {
+        res.send(cart);
     })
 
 });
-*/
 
-/* 
-route.post('/new', (req, res) => {
+route.get('/iscartempty', (req, res) => {
 
-    data.addToCart(req.body.newtodo).then(()=> {
-        res.redirect('/myapi/mycart') // google this. why do we redirect this to /api/todos
+    data.noOfProducts().then((count) => {
+        res.send(count);
+    })
+
+});
+
+route.post('/checkout', (req, res) => {
+    data.cartCheckout(req.body.name).then(()=> {
+        res.redirect('/myapi/mycart');
     }).catch((err) => {
-        res.send(err)
+        
     })
 });
-*/
-module.exports = route;
 
-// add to cart, plus, minus button functions are called from here.
-// these functions are declared in data.js
+
+module.exports = route;

@@ -9,7 +9,7 @@ const db = new Sequelize('test', 'root', 'root', {
     }
 });
 
-const Product = db.define('product', {
+const Product = db.define('products', {
     id: {
         type: Sequelize.INTEGER,
         primaryKey: true,
@@ -21,21 +21,53 @@ const Product = db.define('product', {
 }); // used to define the Table
 
 db.sync({}); // executes db.define
-// force true
+
+const Cart = db.define('carts', {
+    id: {
+        type: Sequelize.INTEGER,
+        primaryKey: true,
+        autoIncrement: true
+    },
+    name: Sequelize.STRING,
+    price: Sequelize.INTEGER,
+    quantity: Sequelize.INTEGER,
+    amount: Sequelize.INTEGER
+}); // used to define the Table
+
+db.sync({}); // executes db.define
 
 function getProducts () {
     return Product.findAll();
 }
 
 function addToCart (product) {
-    return Product.create({
-        name: "",
-        price: 0,
-        quantity: 1
-    })
+    return Cart.create({
+        id: product.id,
+        name: product.name,
+        price: product.price,
+        quantity: product.quantity,
+        amount: product.price*product.quantity
+    });
+} // end of the function addToCart
+
+function getCart() {
+    return Cart.findAll();
+} // end of the function getCart
+
+function noOfProducts() {
+    var a = getCart();
+    console.log(a);
 }
+
+function cartCheckout(data) {
+    Cart.destroy();
+
+} // end of the function cartCheckout
 
 module.exports = {
     getProducts,
-    addToCart
+    addToCart,
+    getCart,
+    cartCheckout,
+    noOfProducts
 };

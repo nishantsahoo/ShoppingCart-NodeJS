@@ -3,16 +3,19 @@
 $(function() {
 
 	var done = false; // done var is used to keep a check whether the cart is empty or not
-    
-    function isCartEmpty() {
-        var counter = 0;
-        for(i=1;i<=3;i++)
-        {
-            if (localStorage.getItem('prod_' + i)) {
-                counter++;
-            }
-        }
-        return counter;
+    var no_of_products;
+    $.get('/myapi/mycart/iscartempty', function (count) {
+        no_of_products = count;
+        console.log('API is called');
+    });
+
+    function getNoOfProducts() {
+        
+        $.get('/myapi/mycart/iscartempty', function (count) {
+                no_of_products = count;
+        });  
+        console.log(no_of_products);
+        return no_of_products;
     } // end of the function isCartEmpty
 
     function setTotalCost() {
@@ -36,29 +39,13 @@ $(function() {
     } // end of the function setTotalCost
 
     function setNoOfProducts() {
-    	var no_of_products = 0;
-    	for(i=1;i<=3;i++)
-    	{
-    		if (localStorage.getItem('prod_' + i)) {
-    			no_of_products += JSON.parse(localStorage.getItem('prod_' + i)).quantity;
-		    }
-    	}
-    	localStorage.setItem('no_of_products', no_of_products);
-    	if (localStorage.getItem('no_of_products')) {
-    		no_of_products = +localStorage.getItem('no_of_products');
-    		$('#noOfProducts').text(no_of_products);
-    	}
-    	else {
-    		localStorage.setItem('no_of_products', '0');
-    		no_of_products = +localStorage.getItem('no_of_products');
-    		$('#noOfProducts').text(no_of_products);
-    	}
+        no_of_products = getNoOfProducts();
+    	$('#noOfProducts').text(no_of_products);
     } // end of the function setNoOfProucts 
 
     function updateCart() {
     	
-    	no_of_products = +localStorage.getItem('no_of_products');
-    	if (no_of_products) {
+    	if (getNoOfProducts()) {
     		if (!done) { // to load the table heads on refresh of the page if (no_of_products>0)
     			var cart_head = $('#cartItemsHead');
     			var head_string = "<tr><th>Product Name</th><th>Price</th><th>Quantity</th><th>Amount</th><tr>";
@@ -70,23 +57,22 @@ $(function() {
             // GET request
     		var cart_body = $('#cartItemsBody');
     		cart_body.empty(); // to delete its elements
-    		for(i=1;i<=3;i++)
-    		{
-    			if (localStorage.getItem('prod_'+i)) {
-    				cartItem = JSON.parse(localStorage.getItem('prod_'+i));
-    				var name = $('product[id=' + i + ']').text();
-    				var cost = +$('price[id=' + i + ']').text();
-    				var amount = cost*cartItem.quantity;
-    				var delCart = "delCartItem";
-    				var cartString = "<tr><td><button id=" + i + " class=" + "red" + " name=" + "delCartItem" + ">x</button><cname id=" + i + ">"+name+"</cname></td>";
-                    cartString += "<td><cprice id=" + i + ">" + cost + "</cprice></td>";
-    				cartString += "<td><button id=" + i + " name=" + "cminus" + " class=" + "red" + ">-</button>";
-    				cartString += "<cquant id=" + i + ">"+cartItem.quantity+"</cquant>";
-    				cartString += "<button id=" + i + " name=" + "cplus" + " class=" + "green" +">+</button></td>";
-    				cartString +="<td><camount id=" + i + ">"+amount+"</camount></td></tr>";
-    				cart_body.append(cartString);
-    			}
-    		}
+            $.get('/myapi/mycart/cartitems', function (data) {
+                cartItems = data;
+            });    
+            console.log(cartItems);
+            if(cartItems) {
+    	       for(cartItem of cartItems)
+    	       {
+        			var cartString = "<tr><td><button id=" + cartItem.id + " class=" + "red" + " name=" + "delCartItem" + ">x</button><cname id=" + i + ">"+name+"</cname></td>";
+                    cartString += "<td><cprice id=" + i + ">" + cartItem.price + "</cprice></td>";
+        		    cartString += "<td><button id=" + i + " name=" + "cminus" + " class=" + "red" + ">-</button>";
+        	        cartString += "<cquant id=" + i + ">"+cartItem.quantity+"</cquant>";
+        			cartString += "<button id=" + i + " name=" + "cplus" + " class=" + "green" +">+</button></td>";
+        			cartString +="<td><camount id=" + i + ">"+cartItem.amount+"</camount></td></tr>";
+        			cart_body.append(cartString);
+        		}
+            }
             setCartStyle(); // call of the function setCartStyle
     	}
     	else
@@ -118,7 +104,7 @@ $(function() {
     } // end of the function setCartStyle
 
     function cartRefresh() { // every time the page is loaded, the card is refreshed
-
+        console.log('cart refresh called');
     	setTotalCost(); // call of the function setTotalCost
     	setNoOfProducts(); // call of the function setNoOfProducts
     	updateCart(); // call of the function updateCart
@@ -145,21 +131,18 @@ $(function() {
         $.get('/myapi/mycart', function (data) {
             setProductsTable(data);
         });
+
     	cartRefresh(); // call of the function cartRefresh
-        setCartStyle();
+        setCartStyle(); // set styles
 
     } // end of the function init
 
     init(); // call of the function init
 
     function reset() {
-    	localStorage.setItem('no_of_products', 0);
-    	no_of_products = +localStorage.getItem('no_of_products');
-    	$('#totalCost').text(no_of_products);
-    	localStorage.setItem('total_cost', 0);
-    	total_cost = +localStorage.getItem('total_cost');
-    	$('#noOfProducts').text(total_cost);
-    	for (var i = 1; i <= 3 ; i++) {
+    	$('#totalCost').text(0);
+    	$('#noOfProducts').text(0);
+    	for (var i = 1; i <= 6 ; i++) {
     		$('quantity[id=' + i +']').text(1);
     	}
     	var cart_head = $('#cartItemsHead');
@@ -239,38 +222,32 @@ $(function() {
 
     $('body').on('click', '.blue' , function() {
     if (this.name == "checkout") {
+            $.post('/myapi/mycart/checkout', {name: "checkout"}, function (data) {
+                
+            });
             alert('Thank you for shopping!');
             reset(); // call of the function reset
-            // del Cart Table
             }
-        } // checkout button
-    }
+    }); // checkout button
+
     $('body').on('click', '.purple' , function() {
     if (this.name == "add-to-cart") {
+            var name = $('product[id=' + this.id + ']').text(); 
             var qty = +$('quantity[id=' + this.id + ']').text();
             var cost = +$('price[id=' + this.id + ']').text();
-            // add to cart (local)
-            // POST request
-
-            if (localStorage.getItem('prod_'+this.id)) {
-                cartItem = JSON.parse(localStorage.getItem('prod_'+this.id));
-                newcartItem = {
-                    'id': this.id,
-                    'quantity': (qty+cartItem.quantity)
-                };
-                localStorage.removeItem('prod_'+this.id)
-                localStorage.setItem('prod_' + this.id, JSON.stringify(newcartItem));
-            }
-            else {
-                newcartItem = {
-                    'id': this.id,
-                    'quantity': qty
-                };
-                localStorage.setItem('prod_' + this.id, JSON.stringify(newcartItem));   
-            }
-            
-            cartRefresh(); // call of the function cartRefresh
+            var amount = qty*cost;
+            p = {
+                'name': name,
+                'price': cost,
+                'quantity': qty,
+                'amount': amount
+            };
+            $.post('/myapi/mycart/addtocart', {product: p}, function (data) {
+                // cartRefresh(data); // call of the function cartRefresh
+            });
             setCartStyle(); // call of the function setCartStyle
             $('quantity[id=' + this.id + ']').text(1);
+            cartRefresh();
         } // add-to-cart button
-    }
+    })
+});

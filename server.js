@@ -12,7 +12,7 @@ app.use('/static', express.static(__dirname + "/public_static"));
 // View things here
 
 const MyApiRoute = require('./routes/myapi');
-app.use('/myapi/mycart', MyApiRoute);
+app.use('/myapi/mycart/', MyApiRoute);
 
 app.listen(9000, function () {
     console.log("Server started on http://localhost:9000");
