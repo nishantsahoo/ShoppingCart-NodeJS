@@ -2,24 +2,6 @@
 
 $(function() {
 
-    var products = {
-        '0': {
-            "name": 'Product_1',
-            "price": 1500,
-            "quantity": 1,
-        },
-        '1': {
-            "name": 'Product_2',
-            "price": 400,
-            "quantity": 1,
-        },
-        '2': {
-            "name": 'Product_3',
-            "price": 3770,
-            "quantity": 1,
-        }
-    }
-
 	var done = false; // done var is used to keep a check whether the cart is empty or not
     
     function isCartEmpty() {
@@ -85,6 +67,7 @@ $(function() {
     		}
 
     		// display using cart.append
+            // GET request
     		var cart_body = $('#cartItemsBody');
     		cart_body.empty(); // to delete its elements
     		for(i=1;i<=3;i++)
@@ -121,7 +104,7 @@ $(function() {
         var cButtonsMinus = $('button[name="cminus"]');
         var pButtonsPlus = $('button[name="plus"]');
         var pButtonsMinus = $('button[name="minus"]');
-        for (var i = 0; i < 3 ; i++) {
+        for (var i = 0; i < 6 ; i++) {
             if (cButtonsMinus[i]) { // check if the button exists
                 cButtonsMinus[i].style.float = "left";
                 cButtonsPlus[i].style.float = "right";
@@ -141,28 +124,27 @@ $(function() {
     	updateCart(); // call of the function updateCart
     } // end of the function cartRefresh
 
-    function setProductsTable() {
+    function setProductsTable(products) {
 
         productBody = $('#productItemsBody');
-        for(i=0;i<3;i++)
+
+        for(product of products)
         {
-            var productString = "<tr><td><product id=" + (i+1) + ">" + products[i].name + "</product></td>";
-            productString +="<td><price id=" + (i+1) + ">" + products[i].price + "</price></td>";
-            productString += "<td><button id=" + (i+1) + " name=" + "minus" + " class=" + "red" + ">-</button>";
-            productString += "<quantity id=" + (i+1) + ">" + products[i].quantity + "</quantity>";
-            productString += "<button id=" + (i+1) + " name=" + "plus" + " class=" + "green" +">+</button></td>";
-            productString += "<td><button id=" + (i+1) + " style=" + "margin-left: 0.85em" + " name=" + "add-to-cart" + " class=" + "purple" + ">Add to Cart</button></td></tr>";
+            var productString = "<tr><td><product id=" + product.id + ">" + product.name + "</product></td>";
+            productString +="<td><price id=" + product.id + ">" + product.price + "</price></td>";
+            productString += "<td><button id=" + product.id + " name=" + "minus" + " class=" + "red" + ">-</button>";
+            productString += "<quantity id=" + product.id + ">" + product.quantity + "</quantity>";
+            productString += "<button id=" + product.id + " name=" + "plus" + " class=" + "green" +">+</button></td>";
+            productString += "<td><button id=" + product.id + " style=" + "margin-left: 0.85em" + " name=" + "add-to-cart" + " class=" + "purple" + ">Add to Cart</button></td></tr>";
             productBody.append(productString);
         }
-        /*
-        for (var i = 1; i <= 3 ; i++) {
-            $('quantity[id=' + i +']').text(1);
-        }
-        */
+        setCartStyle();
     }
 
     function init() {
-        setProductsTable();
+        $.get('/myapi/mycart', function (data) {
+            setProductsTable(data);
+        });
     	cartRefresh(); // call of the function cartRefresh
         setCartStyle();
 
@@ -227,6 +209,11 @@ $(function() {
             cartRefresh(); // call of the function cartRefresh
         } // cminus button
 
+                if (this.name == "minus") { // if '-' button is clicked
+            qtyDecrement(this.id); // decrease quantity by 1
+        } // minus button
+
+
      });
 
     $('body').on('click', '.green' , function() { // To delete elements after they've been dynamically updated
@@ -243,53 +230,47 @@ $(function() {
                 localStorage.setItem('prod_' + this.id, JSON.stringify(newcartItem));
                 cartRefresh(); // call of the function cartRefresh
         }
+
+        if (this.name == "plus") { // if '-' button is clicked
+            qtyIncrement(this.id); // increase quantity by 1
+        } // plus button
+
      });
 
-    
-    $("button").click(function() { // button click function
-
-    	if (this.name == "plus") { // if '-' button is clicked
-    		qtyIncrement(this.id); // increase quantity by 1
-    	} // plus button
-
-    	if (this.name == "minus") { // if '-' button is clicked
-    		qtyDecrement(this.id); // decrease quantity by 1
-    	} // minus button
-
-    	if (this.name == "add-to-cart") {
-    		var qty = +$('quantity[id=' + this.id + ']').text();
-    		var cost = +$('price[id=' + this.id + ']').text();
-    		// add to cart (local)
-    		if (localStorage.getItem('prod_'+this.id)) {
-	    		cartItem = JSON.parse(localStorage.getItem('prod_'+this.id));
-	    		newcartItem = {
-	    			'id': this.id,
-	    			'quantity': (qty+cartItem.quantity)
-	    		};
-	    		localStorage.removeItem('prod_'+this.id)
-	    		localStorage.setItem('prod_' + this.id, JSON.stringify(newcartItem));
-	    	}
-	    	else {
-	    		newcartItem = {
-	    			'id': this.id,
-	    			'quantity': qty
-	    		};
-	    		localStorage.setItem('prod_' + this.id, JSON.stringify(newcartItem));	
-	    	}
-    		
-    		cartRefresh(); // call of the function cartRefresh
-            setCartStyle(); // call of the function setCartStyle
-    		$('quantity[id=' + this.id + ']').text(1);
-    	} // add-to-cart button
-    	
-    	if (this.name == "checkout") {
+    $('body').on('click', '.blue' , function() {
+    if (this.name == "checkout") {
             alert('Thank you for shopping!');
-    		reset(); // call of the function reset
-    		for (var i = 3; i >= 1; i--) {
-    			localStorage.removeItem('prod_' + i);
-    		}
-    	} // checkout button
+            reset(); // call of the function reset
+            // del Cart Table
+            }
+        } // checkout button
+    }
+    $('body').on('click', '.purple' , function() {
+    if (this.name == "add-to-cart") {
+            var qty = +$('quantity[id=' + this.id + ']').text();
+            var cost = +$('price[id=' + this.id + ']').text();
+            // add to cart (local)
+            // POST request
 
-	});
-    
-});
+            if (localStorage.getItem('prod_'+this.id)) {
+                cartItem = JSON.parse(localStorage.getItem('prod_'+this.id));
+                newcartItem = {
+                    'id': this.id,
+                    'quantity': (qty+cartItem.quantity)
+                };
+                localStorage.removeItem('prod_'+this.id)
+                localStorage.setItem('prod_' + this.id, JSON.stringify(newcartItem));
+            }
+            else {
+                newcartItem = {
+                    'id': this.id,
+                    'quantity': qty
+                };
+                localStorage.setItem('prod_' + this.id, JSON.stringify(newcartItem));   
+            }
+            
+            cartRefresh(); // call of the function cartRefresh
+            setCartStyle(); // call of the function setCartStyle
+            $('quantity[id=' + this.id + ']').text(1);
+        } // add-to-cart button
+    }
