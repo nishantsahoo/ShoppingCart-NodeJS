@@ -3,19 +3,10 @@
 $(function() {
 
 	var done = false; // done var is used to keep a check whether the cart is empty or not
-    var no_of_products;
-    $.get('/myapi/mycart/iscartempty', function (count) {
-        no_of_products = count;
-        console.log('API is called');
-    });
-
+    var no_of_products = 0;
+     
     function getNoOfProducts() {
-        
-        $.get('/myapi/mycart/iscartempty', function (count) {
-                no_of_products = count;
-        });  
-        console.log(no_of_products);
-        return no_of_products;
+        return 1;
     } // end of the function isCartEmpty
 
     function setTotalCost() {
@@ -38,8 +29,8 @@ $(function() {
 		}
     } // end of the function setTotalCost
 
-    function setNoOfProducts() {
-        no_of_products = getNoOfProducts();
+    function setNoOfProducts(count) {
+        no_of_products = count;
     	$('#noOfProducts').text(no_of_products);
     } // end of the function setNoOfProucts 
 
@@ -57,23 +48,24 @@ $(function() {
             // GET request
     		var cart_body = $('#cartItemsBody');
     		cart_body.empty(); // to delete its elements
-            $.get('/myapi/mycart/cartitems', function (data) {
-                cartItems = data;
-            });    
-            console.log(cartItems);
-            if(cartItems) {
-    	       for(cartItem of cartItems)
-    	       {
-        			var cartString = "<tr><td><button id=" + cartItem.id + " class=" + "red" + " name=" + "delCartItem" + ">x</button><cname id=" + i + ">"+name+"</cname></td>";
-                    cartString += "<td><cprice id=" + i + ">" + cartItem.price + "</cprice></td>";
-        		    cartString += "<td><button id=" + i + " name=" + "cminus" + " class=" + "red" + ">-</button>";
-        	        cartString += "<cquant id=" + i + ">"+cartItem.quantity+"</cquant>";
-        			cartString += "<button id=" + i + " name=" + "cplus" + " class=" + "green" +">+</button></td>";
-        			cartString +="<td><camount id=" + i + ">"+cartItem.amount+"</camount></td></tr>";
-        			cart_body.append(cartString);
-        		}
-            }
+            $.get('/myapi/mycart/getcart', function (data) {
+                var items = data;
+                if(items) {
+                   for(cartItem in items)
+                   {
+                        cart_body = $('#cartItemsBody');
+                        var cartString = "<tr><td><button id=" + items[cartItem].id + " class=" + "red" + " name=" + "delCartItem" + ">x</button><cname id=" + i + ">"+items[cartItem].name+"</cname></td>";
+                        cartString += "<td><cprice id=" + i + ">" + items[cartItem].price + "</cprice></td>";
+                        cartString += "<td><button id=" + i + " name=" + "cminus" + " class=" + "red" + ">-</button>";
+                        cartString += "<cquant id=" + i + ">"+items[cartItem].quantity+"</cquant>";
+                        cartString += "<button id=" + i + " name=" + "cplus" + " class=" + "green" +">+</button></td>";
+                        cartString +="<td><camount id=" + i + ">"+items[cartItem].amount+"</camount></td></tr>";
+                        cart_body.append(cartString);
+                    }
+                }
             setCartStyle(); // call of the function setCartStyle
+            });    
+            
     	}
     	else
     	{
@@ -104,16 +96,19 @@ $(function() {
     } // end of the function setCartStyle
 
     function cartRefresh() { // every time the page is loaded, the card is refreshed
-        console.log('cart refresh called');
     	setTotalCost(); // call of the function setTotalCost
-    	setNoOfProducts(); // call of the function setNoOfProducts
-    	updateCart(); // call of the function updateCart
+
+        $.get('/myapi/mycart/countproducts', function (count) {
+            setNoOfProducts(count); // call of the function setNoOfProducts
+            updateCart(); // call of the function updateCart
+
+        });
+        
+    	
     } // end of the function cartRefresh
 
     function setProductsTable(products) {
-
         productBody = $('#productItemsBody');
-
         for(product of products)
         {
             var productString = "<tr><td><product id=" + product.id + ">" + product.name + "</product></td>";
@@ -128,7 +123,7 @@ $(function() {
     }
 
     function init() {
-        $.get('/myapi/mycart', function (data) {
+        $.get('/myapi/mycart/', function (data) {
             setProductsTable(data);
         });
 
@@ -140,7 +135,8 @@ $(function() {
     init(); // call of the function init
 
     function reset() {
-    	$('#totalCost').text(0);
+        total_cost = 0;
+    	$('#totalCost').text(total_cost);
     	$('#noOfProducts').text(0);
     	for (var i = 1; i <= 6 ; i++) {
     		$('quantity[id=' + i +']').text(1);
@@ -181,14 +177,7 @@ $(function() {
             var x = +$('cquant[id=' + this.id + ']').text();
             $('cquant[id=' + this.id + ']').text(--x); 
             }
-            var qty = +$('cquant[id=' + this.id + ']').text();
-            cartItem = JSON.parse(localStorage.getItem('prod_'+this.id));
-                newcartItem = {
-                    'id': this.id,
-                    'quantity': (qty)
-                };
-                localStorage.removeItem('prod_'+this.id)
-                localStorage.setItem('prod_' + this.id, JSON.stringify(newcartItem));
+            // update cart
             cartRefresh(); // call of the function cartRefresh
         } // cminus button
 
@@ -203,8 +192,8 @@ $(function() {
         if (this.name == "cplus") {
             var x = +$('cquant[id=' + this.id + ']').text();
             $('cquant[id=' + this.id + ']').text(++x);
-        var qty = +$('cquant[id=' + this.id + ']').text();
-        cartItem = JSON.parse(localStorage.getItem('prod_'+this.id));
+            var qty = +$('cquant[id=' + this.id + ']').text();
+            cartItem = JSON.parse(localStorage.getItem('prod_'+this.id));
                 newcartItem = {
                     'id': this.id,
                     'quantity': (qty)
@@ -243,7 +232,7 @@ $(function() {
                 'amount': amount
             };
             $.post('/myapi/mycart/addtocart', {product: p}, function (data) {
-                // cartRefresh(data); // call of the function cartRefresh
+                data = "";
             });
             setCartStyle(); // call of the function setCartStyle
             $('quantity[id=' + this.id + ']').text(1);

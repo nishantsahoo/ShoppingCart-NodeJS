@@ -51,16 +51,17 @@ function addToCart (product) {
 } // end of the function addToCart
 
 function getCart() {
-    return Cart.findAll();
+    if (Cart.findAll())
+        return Cart.findAll();
+    else
+        return 0;
 } // end of the function getCart
 
-function noOfProducts() {
-    var a = getCart();
-    console.log(a);
+function noofproducts() {
+    return Cart.count();
 }
-
 function cartCheckout(data) {
-    Cart.destroy();
+    Cart.destroy({ where: {}});
 
 } // end of the function cartCheckout
 
@@ -69,5 +70,5 @@ module.exports = {
     addToCart,
     getCart,
     cartCheckout,
-    noOfProducts
+    noofproducts
 };

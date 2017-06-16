@@ -9,7 +9,7 @@ const db = new Sequelize('test', 'root', 'root', {
     }
 });
 
-const Product = db.define('product', {
+const Product = db.define('products', {
     id: {
         type: Sequelize.INTEGER,
         primaryKey: true,
@@ -22,9 +22,6 @@ const Product = db.define('product', {
 
 db.sync({}); // executes db.define
 // force true
-
-
-
 
 var products = [
         {
@@ -58,21 +55,5 @@ var products = [
             "quantity": 1,
         }
 ]
-
-/*
-for (i=0;i<6;i++) {
-    initProducts(products[i]);
-    for(j=0;j<1000000000;j++);
-}
-*/
-
-function getProducts () {
-    return Product.findAll({
-        where:
-            {
-                quantity: 1
-            }
-    });
-}
 
 Product.create(products[5]);
