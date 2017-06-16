@@ -1,11 +1,10 @@
 // $ function is loaded only once HTML has completely loaded
-
 $(function()
 {
 
 	var done = false; // done var is used to keep a check whether the cart is empty or not
     var no_of_products = 0;
-     
+    
     function getNoOfProducts() { return no_of_products; } // end of the function isCartEmpty
 
     function setTotalCost(total_cost) { $('#totalCost').text(total_cost); } // end of the function setTotalCost
@@ -113,7 +112,8 @@ $(function()
     init(); // call of the function init
     // first function to be called in this script
 
-    function reset() {
+    function reset()
+    {
         total_cost = 0;
     	$('#totalCost').text(total_cost);
     	$('#noOfProducts').text(0);
@@ -128,21 +128,26 @@ $(function()
     	done = false;
     } // end of the function reset
 
-    function qtyDecrement(qty_id) {
-    	if (($('quantity[id=' + qty_id + ']').text())>1) { // Quantity can't be lesser than 1
+    function qtyDecrement(qty_id)
+    {
+    	if (($('quantity[id=' + qty_id + ']').text())>1) // Quantity can't be lesser than 1
+        {
     		var x = +$('quantity[id=' + qty_id + ']').text();
     		$('quantity[id=' + qty_id + ']').text(--x);	
     	}
     } // end of the function qtyDecrement
 
-    function qtyIncrement(qty_id) {
+    function qtyIncrement(qty_id)
+    {
     	var x = +$('quantity[id=' + qty_id + ']').text();
     	$('quantity[id=' + qty_id + ']').text(++x);
     } // end of the function qtyIncrement
 
     // Very important function
-    $('body').on('click', '.red' , function() { // To delete elements after they've been dynamically updated
-    	if (this.name == "delCartItem") {
+    $('body').on('click', '.red' , function() // To delete elements after they've been dynamically updated
+    {
+        if (this.name == "delCartItem")
+        {
     		// delete item
     		cartRefresh(); // call of the function cartRefresh
             if(!isCartEmpty())
@@ -151,24 +156,26 @@ $(function()
             }
     	} // delCartItem button
 
-        if (this.name == "cminus") {
+        if (this.name == "cminus") // minus button for cart
+        {
             $('cquant[id=' + this.id + ']').text();
-            if (($('cquant[id=' + this.id + ']').text())>1) { // Quantity can't be lesser than 1
+            if (($('cquant[id=' + this.id + ']').text())>1)// Quantity can't be lesser than 1
+            {
                 var x = +$('cquant[id=' + this.id + ']').text();
                 $('cquant[id=' + this.id + ']').text(--x); 
             }
-            // update cart
+            // update cart table
             cartRefresh(); // call of the function cartRefresh
         } // cminus button
 
-        if (this.name == "minus") { // if '-' button is clicked
-            qtyDecrement(this.id); // decrease quantity by 1
-        } // minus button
+        if (this.name == "minus") { qtyDecrement(this.id); } 
 
      });
 
-    $('body').on('click', '.green' , function() { // To delete elements after they've been dynamically updated
-        if (this.name == "cplus") {
+    $('body').on('click', '.green' , function() // To delete elements after they've been dynamically updated
+    {
+        if (this.name == "cplus")
+        {
             var x = +$('cquant[id=' + this.id + ']').text();
             $('cquant[id=' + this.id + ']').text(++x);
             var qty = +$('cquant[id=' + this.id + ']').text();
@@ -182,22 +189,23 @@ $(function()
                 cartRefresh(); // call of the function cartRefresh
         }
 
-        if (this.name == "plus") { // if '-' button is clicked
-            qtyIncrement(this.id); // increase quantity by 1
-        } // plus button
-
+        if (this.name == "plus") { qtyIncrement(this.id); }
      });
 
-    $('body').on('click', '.blue' , function() {
-        if (this.name == "checkout") {
-            $.post('/myapi/mycart/checkout', {name: "checkout"}, function (data) {});
+    $('body').on('click', '.blue' , function()
+    {
+        if (this.name == "checkout")
+        {
+            $.post('/myapi/mycart/checkout', {name: "checkout"}, function (data) { });
             alert('Thank you for shopping!');
             reset(); // call of the function reset
         }
     }); // checkout button
 
-    $('body').on('click', '.purple' , function() {
-        if (this.name == "add-to-cart") {
+    $('body').on('click', '.purple' , function()
+    {
+        if (this.name == "add-to-cart")
+        {
             var name = $('product[id=' + this.id + ']').text(); 
             var qty = +$('quantity[id=' + this.id + ']').text();
             var cost = +$('price[id=' + this.id + ']').text();
@@ -209,11 +217,12 @@ $(function()
                 'amount': amount
             };
             $('quantity[id=' + this.id + ']').text(1);
-            $.post('/myapi/mycart/addtocart', {product: p}, function (data) {
-                data = "";
+            $.post('/myapi/mycart/addtocart', {product: p}, function (data)
+            {
                 setCartStyle(); // call of the function setCartStyle
                 cartRefresh(); // call of the function cartRefresh
             });
-        } // add-to-cart button
+        }
     })
-});
+
+}); // end of the script file
