@@ -36,9 +36,7 @@ const Cart = db.define('carts', {
 
 db.sync({}); // executes db.define
 
-function getProducts () {
-    return Product.findAll();
-}
+function getProducts () { return Product.findAll(); } // end of the function getProducts
 
 function addToCart (product) {
     return Cart.create({
@@ -57,18 +55,32 @@ function getCart() {
         return 0;
 } // end of the function getCart
 
-function noofproducts() {
-    return Cart.sum('quantity');
+function noofproducts()
+{
+    if(Cart.sum('quantity'))
+        return Cart.sum('quantity');
+    else
+        return 0;
+} // end of the function noofproducts
+
+function totalamount()
+{
+    if(Cart.sum('amount'))
+        return Cart.sum('amount');
+    else
+        return 0;
 }
 
-function totalamount() {
-    return Cart.sum('amount');
+function cartCheckout(data) { Cart.destroy({ where: {}}); } // end of the function cartCheckout
+
+function delFromCart(cartItemID)
+{
+    Cart.destroy({
+      where: {
+        id: cartItemID
+      }
+    });
 }
-
-function cartCheckout(data) {
-    Cart.destroy({ where: {}});
-
-} // end of the function cartCheckout
 
 module.exports = {
     getProducts,
@@ -76,5 +88,6 @@ module.exports = {
     getCart,
     cartCheckout,
     noofproducts,
-    totalamount
+    totalamount,
+    delFromCart
 };

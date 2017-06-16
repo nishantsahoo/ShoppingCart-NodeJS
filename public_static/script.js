@@ -1,17 +1,42 @@
 // $ function is loaded only once HTML has completely loaded
 $(function()
 {
-
 	var done = false; // done var is used to keep a check whether the cart is empty or not
     var no_of_products = 0;
+    var total_cost = 0;
     
-    function getNoOfProducts() { return no_of_products; } // end of the function isCartEmpty
+    function getNoOfProducts() { return (+$('#noOfProducts').text()); } // end of the function isCartEmpty
 
-    function setTotalCost(total_cost) { $('#totalCost').text(total_cost); } // end of the function setTotalCost
+    function setTotalCost(totalamount)
+    {
+        if (totalamount)
+        {
+            total_cost = totalamount;
+            $('#totalCost').text(total_cost);    
+        }
+        else
+        {
+            total_cost = 0;
+            $('#totalCost').text(0);        
+        }
+    } // end of the function setTotalCost
 
-    function setNoOfProducts(no_of_products) { $('#noOfProducts').text(no_of_products); } // end of the function setNoOfProucts 
+    function setNoOfProducts(value)
+    {
+        if (value)
+        {
+            no_of_products = value;
+            $('#noOfProducts').text(no_of_products);
+        }
+        else
+        {
+            no_of_products = 0;
+            $('#noOfProducts').text(no_of_products); 
+        }
+        
+    } // end of the function setNoOfProucts 
 
-    function updateCart() 
+    function updateCart()
     {
     	if (getNoOfProducts()) 
         {
@@ -25,10 +50,9 @@ $(function()
     		}
     		var cart_body = $('#cartItemsBody');
     		cart_body.empty(); // to delete its elements
-            $.get('/myapi/mycart/getcart', function (data)
+            $.get('/myapi/mycart/getcart', function (items)
             {
-                var items = data;
-                if(items) 
+                if(items)
                 {
                     for(cartItem in items)
                     {
@@ -43,7 +67,7 @@ $(function()
                     }
                 }
                 setCartStyle(); // call of the function setCartStyle
-            });                
+            });
     	}
     	else 
         {
@@ -76,15 +100,15 @@ $(function()
 
     function cartRefresh() // every time the page is loaded, the card is refreshed
     {
-        $.get('/myapi/mycart/totalamount', function (count)
+        $.get('/myapi/mycart/totalamount', function (AMOUNT)
         {
-            setTotalCost(count); // call of the function setNoOfProducts
+            setTotalCost(AMOUNT); // call of the function setNoOfProducts
             $.get('/myapi/mycart/countproducts', function (count)
             {
                 setNoOfProducts(count); // call of the function setNoOfProducts
                 updateCart(); // call of the function updateCart
             });
-        });	
+        });
     } // end of the function cartRefresh
 
     function setProductsTable(products) 
@@ -105,9 +129,17 @@ $(function()
 
     function init()
     {
-        $.get('/myapi/mycart/', function (data) { setProductsTable(data); }); // call of the function setProductsTable
-    	cartRefresh(); // call of the function cartRefresh
-        setCartStyle(); // set styles
+        $.get('/myapi/mycart/', function (data) 
+        { 
+            setProductsTable(data);
+            cartRefresh(); // call of the function cartRefresh
+            if(getNoOfProducts())
+            {
+                reset();
+            }
+            setCartStyle(); // set styles
+        }); // call of the function setProductsTable
+    	
     } // end of the function init
 
     init(); // call of the function init
@@ -115,6 +147,7 @@ $(function()
 
     function reset()
     {
+        no_of_products = 0;
         total_cost = 0;
     	$('#totalCost').text(total_cost);
     	$('#noOfProducts').text(0);
@@ -149,12 +182,14 @@ $(function()
     {
         if (this.name == "delCartItem")
         {
-    		// delete item
-    		cartRefresh(); // call of the function cartRefresh
-            if(!isCartEmpty())
+    		$.get('/myapi/mycart/delfromcart', {id: this.id}, function (data)
             {
-                done = false;
-            }
+                cartRefresh(); // call of the function cartRefresh
+                if(!getNoOfProducts())
+                {
+                    done = false;
+                }
+            });
     	} // delCartItem button
 
         if (this.name == "cminus") // minus button for cart
@@ -218,8 +253,8 @@ $(function()
             $('quantity[id=' + this.id + ']').text(1);
             $.post('/myapi/mycart/addtocart', {product: p}, function (data)
             {
-                setCartStyle(); // call of the function setCartStyle
                 cartRefresh(); // call of the function cartRefresh
+                setCartStyle(); // call of the function setCartStyle
             });
         }
     })
