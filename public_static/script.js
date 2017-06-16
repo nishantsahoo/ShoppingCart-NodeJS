@@ -25,7 +25,8 @@ $(function()
     		}
     		var cart_body = $('#cartItemsBody');
     		cart_body.empty(); // to delete its elements
-            $.get('/myapi/mycart/getcart', function (data) {
+            $.get('/myapi/mycart/getcart', function (data)
+            {
                 var items = data;
                 if(items) 
                 {
@@ -130,7 +131,7 @@ $(function()
 
     function qtyDecrement(qty_id)
     {
-    	if (($('quantity[id=' + qty_id + ']').text())>1) // Quantity can't be lesser than 1
+    	if (($('quantity[id=' + qty_id + ']').text())>1) // Quantity can't be less than 1
         {
     		var x = +$('quantity[id=' + qty_id + ']').text();
     		$('quantity[id=' + qty_id + ']').text(--x);	
@@ -144,7 +145,7 @@ $(function()
     } // end of the function qtyIncrement
 
     // Very important function
-    $('body').on('click', '.red' , function() // To delete elements after they've been dynamically updated
+    $('body').on('click', '.red' , function() // To access elements after they've been dynamically updated
     {
         if (this.name == "delCartItem")
         {
@@ -179,14 +180,12 @@ $(function()
             var x = +$('cquant[id=' + this.id + ']').text();
             $('cquant[id=' + this.id + ']').text(++x);
             var qty = +$('cquant[id=' + this.id + ']').text();
-            cartItem = JSON.parse(localStorage.getItem('prod_'+this.id));
-                newcartItem = {
-                    'id': this.id,
-                    'quantity': (qty)
-                };
-                localStorage.removeItem('prod_'+this.id)
-                localStorage.setItem('prod_' + this.id, JSON.stringify(newcartItem));
-                cartRefresh(); // call of the function cartRefresh
+            newcartItem = {
+                'id': this.id,
+                'quantity': (qty)
+            };
+            // update cart table
+            cartRefresh(); // call of the function cartRefresh
         }
 
         if (this.name == "plus") { qtyIncrement(this.id); }
