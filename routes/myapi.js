@@ -9,20 +9,15 @@ route.get('/', (req, res) => {
 
 });
 
-
 route.post('/addtocart', (req, res) => {
     data.addToCart(req.body.product);
     res.redirect('/myapi/mycart');
 });
 
 route.post('/checkout', (req, res) => {
-    data.cartCheckout(req.body.name).then(()=> {
-        res.redirect('/myapi/mycart');
-    }).catch((err) => {
-        
-    })
+    data.cartCheckout(req.body.name);
+    res.redirect('/myapi/mycart');
 });
-
 
 route.get('/getcart', (req, res) => {
 
@@ -39,6 +34,17 @@ route.get('/countproducts', (req, res) => {
     		res.send('' + 0); // CONVERT INTO A STRING ELSE INTEGERS ARE SENT AS STATUS CODE
     	}
         res.send('' + count);
+    })
+
+});
+
+route.get('/totalamount', (req, res) => {
+
+    data.totalamount().then((amount) => {
+    	if(!amount) {
+    		res.send('' + 0); // CONVERT INTO A STRING ELSE INTEGERS ARE SENT AS STATUS CODE
+    	}
+        res.send('' + amount);
     })
 
 });

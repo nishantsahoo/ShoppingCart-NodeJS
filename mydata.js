@@ -58,8 +58,13 @@ function getCart() {
 } // end of the function getCart
 
 function noofproducts() {
-    return Cart.count();
+    return Cart.sum('quantity');
 }
+
+function totalamount() {
+    return Cart.sum('amount');
+}
+
 function cartCheckout(data) {
     Cart.destroy({ where: {}});
 
@@ -70,5 +75,6 @@ module.exports = {
     addToCart,
     getCart,
     cartCheckout,
-    noofproducts
+    noofproducts,
+    totalamount
 };

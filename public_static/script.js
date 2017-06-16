@@ -3,30 +3,15 @@
 $(function() {
 
 	var done = false; // done var is used to keep a check whether the cart is empty or not
+
     var no_of_products = 0;
      
     function getNoOfProducts() {
-        return 1;
+        return no_of_products;
     } // end of the function isCartEmpty
 
-    function setTotalCost() {
-    	var total_cost = 0;
-    	for(i=1;i<=3;i++)
-    	{
-    		if (localStorage.getItem('prod_' + i)) {
-    			var qty = JSON.parse(localStorage.getItem('prod_' + i)).quantity;
-    			var cost = +$('price[id=' + i + ']').text();
-    			total_cost += qty*cost;
-		    }
-    	}
-    	if (localStorage.getItem('total_cost')) {
-		    $('#totalCost').text(total_cost);
-		    localStorage.setItem('total_cost', total_cost);
-		}
-		else {
-		   	localStorage.setItem('total_cost', '0');
-		   	$('#totalCost').text('0');
-		}
+    function setTotalCost(total_cost) {
+		   	$('#totalCost').text(total_cost);
     } // end of the function setTotalCost
 
     function setNoOfProducts(count) {
@@ -51,30 +36,27 @@ $(function() {
             $.get('/myapi/mycart/getcart', function (data) {
                 var items = data;
                 if(items) {
-                   for(cartItem in items)
-                   {
+                    for(cartItem in items)
+                    {
                         cart_body = $('#cartItemsBody');
-                        var cartString = "<tr><td><button id=" + items[cartItem].id + " class=" + "red" + " name=" + "delCartItem" + ">x</button><cname id=" + i + ">"+items[cartItem].name+"</cname></td>";
-                        cartString += "<td><cprice id=" + i + ">" + items[cartItem].price + "</cprice></td>";
-                        cartString += "<td><button id=" + i + " name=" + "cminus" + " class=" + "red" + ">-</button>";
-                        cartString += "<cquant id=" + i + ">"+items[cartItem].quantity+"</cquant>";
-                        cartString += "<button id=" + i + " name=" + "cplus" + " class=" + "green" +">+</button></td>";
-                        cartString +="<td><camount id=" + i + ">"+items[cartItem].amount+"</camount></td></tr>";
+                        var cartString = "<tr><td><button id=" + items[cartItem].id + " class=" + "red" + " name=" + "delCartItem" + ">x</button><cname id=" + items[cartItem].id + ">"+items[cartItem].name+"</cname></td>";
+                        cartString += "<td><cprice id=" + items[cartItem].id + ">" + items[cartItem].price + "</cprice></td>";
+                        cartString += "<td><button id=" + items[cartItem].id + " name=" + "cminus" + " class=" + "red" + ">-</button>";
+                        cartString += "<cquant id=" + items[cartItem].id + ">"+items[cartItem].quantity+"</cquant>";
+                        cartString += "<button id=" + items[cartItem].id + " name=" + "cplus" + " class=" + "green" +">+</button></td>";
+                        cartString +="<td><camount id=" + items[cartItem].id + ">"+items[cartItem].amount+"</camount></td></tr>";
                         cart_body.append(cartString);
                     }
                 }
             setCartStyle(); // call of the function setCartStyle
-            });    
-            
+            });                
     	}
-    	else
-    	{
+    	else {
     		var cart_head = $('#cartItemsHead');
     		cart_head.empty(); // to remove the child elements
     		var cart_body = $('#cartItemsBody');
     		cart_body.empty(); // to remove the child elements
     	}
-
     } // end of the function updateCart
 
     function setCartStyle() { // Using this function to set style of cminus and cplus buttons
@@ -96,15 +78,13 @@ $(function() {
     } // end of the function setCartStyle
 
     function cartRefresh() { // every time the page is loaded, the card is refreshed
-    	setTotalCost(); // call of the function setTotalCost
-
-        $.get('/myapi/mycart/countproducts', function (count) {
+        $.get('/myapi/mycart/totalamount', function (count) {
+            setTotalCost(count); // call of the function setNoOfProducts
+            $.get('/myapi/mycart/countproducts', function (count) {
             setNoOfProducts(count); // call of the function setNoOfProducts
             updateCart(); // call of the function updateCart
-
-        });
-        
-    	
+            });
+        });	
     } // end of the function cartRefresh
 
     function setProductsTable(products) {
@@ -119,12 +99,12 @@ $(function() {
             productString += "<td><button id=" + product.id + " style=" + "margin-left: 0.85em" + " name=" + "add-to-cart" + " class=" + "purple" + ">Add to Cart</button></td></tr>";
             productBody.append(productString);
         }
-        setCartStyle();
+        setCartStyle(); // call of the function setCartStyle
     }
 
     function init() {
         $.get('/myapi/mycart/', function (data) {
-            setProductsTable(data);
+            setProductsTable(data); // call of the function setProductsTable
         });
 
     	cartRefresh(); // call of the function cartRefresh
@@ -163,8 +143,8 @@ $(function() {
     // Very important function
     $('body').on('click', '.red' , function() { // To delete elements after they've been dynamically updated
     	if (this.name == "delCartItem") {
-    		localStorage.removeItem("prod_" + this.id);
-    		cartRefresh();
+    		// delete item
+    		cartRefresh(); // call of the function cartRefresh
             if(!isCartEmpty())
             {
                 done = false;
@@ -172,19 +152,18 @@ $(function() {
     	} // delCartItem button
 
         if (this.name == "cminus") {
-            $('cquant[id=' + this.id + ']').text()
+            $('cquant[id=' + this.id + ']').text();
             if (($('cquant[id=' + this.id + ']').text())>1) { // Quantity can't be lesser than 1
-            var x = +$('cquant[id=' + this.id + ']').text();
-            $('cquant[id=' + this.id + ']').text(--x); 
+                var x = +$('cquant[id=' + this.id + ']').text();
+                $('cquant[id=' + this.id + ']').text(--x); 
             }
             // update cart
             cartRefresh(); // call of the function cartRefresh
         } // cminus button
 
-                if (this.name == "minus") { // if '-' button is clicked
+        if (this.name == "minus") { // if '-' button is clicked
             qtyDecrement(this.id); // decrease quantity by 1
         } // minus button
-
 
      });
 
@@ -210,17 +189,15 @@ $(function() {
      });
 
     $('body').on('click', '.blue' , function() {
-    if (this.name == "checkout") {
-            $.post('/myapi/mycart/checkout', {name: "checkout"}, function (data) {
-                
-            });
+        if (this.name == "checkout") {
+            $.post('/myapi/mycart/checkout', {name: "checkout"}, function (data) {});
             alert('Thank you for shopping!');
             reset(); // call of the function reset
-            }
+        }
     }); // checkout button
 
     $('body').on('click', '.purple' , function() {
-    if (this.name == "add-to-cart") {
+        if (this.name == "add-to-cart") {
             var name = $('product[id=' + this.id + ']').text(); 
             var qty = +$('quantity[id=' + this.id + ']').text();
             var cost = +$('price[id=' + this.id + ']').text();
@@ -231,12 +208,12 @@ $(function() {
                 'quantity': qty,
                 'amount': amount
             };
+            $('quantity[id=' + this.id + ']').text(1);
             $.post('/myapi/mycart/addtocart', {product: p}, function (data) {
                 data = "";
+                setCartStyle(); // call of the function setCartStyle
+                cartRefresh(); // call of the function cartRefresh
             });
-            setCartStyle(); // call of the function setCartStyle
-            $('quantity[id=' + this.id + ']').text(1);
-            cartRefresh();
         } // add-to-cart button
     })
 });
