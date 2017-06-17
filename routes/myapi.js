@@ -23,6 +23,16 @@ route.get('/getcart', (req, res) => {
     })
 });
 
+route.post('/decrementCart', (req, res) => {
+    data.decrementCart(req.body.id);
+    res.redirect('/myapi/mycart');
+});
+
+route.post('/incrementCart', (req, res) => {
+    data.incrementCart(req.body.id);
+    res.redirect('/myapi/mycart');
+});
+
 route.post('/delfromcart', (req, res) => {
     data.delFromCart(req.body.id);
     res.redirect('/myapi/mycart');

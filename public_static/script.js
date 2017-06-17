@@ -118,7 +118,7 @@ $(function()
         });
     } // end of the function cartRefresh
 
-    function setProductsTable(products) 
+    function setProductsTable(products)
     {
         productBody = $('#productItemsBody');
         for(product of products)
@@ -129,7 +129,7 @@ $(function()
             productString += "<quantity id=" + product.id + ">" + product.quantity + "</quantity>";
             productString += "<button id=" + product.id + " name=" + "plus" + " class=" + "green" +">+</button></td>";
             productString += "<td><button id=" + product.id + " style=" + "margin-left: 0.85em" + " name=" + "add-to-cart" + " class=" + "purple" + ">Add to Cart</button></td></tr>";
-            productBody.append(productString);
+             productBody.append(productString);
         }
         setCartStyle(); // call of the function setCartStyle
     } // end of the function setProductsTable
@@ -206,9 +206,11 @@ $(function()
             {
                 var x = +$('cquant[id=' + this.id + ']').text();
                 $('cquant[id=' + this.id + ']').text(--x); 
+                $.post('/myapi/mycart/decrementCart', {id: this.id}, function (data)
+                {
+                    cartRefresh(); // call of the function cartRefresh
+                });
             }
-            // update cart table
-            cartRefresh(); // call of the function cartRefresh
         } // cminus button
 
         if (this.name == "minus") { qtyDecrement(this.id); } 
@@ -222,12 +224,11 @@ $(function()
             var x = +$('cquant[id=' + this.id + ']').text();
             $('cquant[id=' + this.id + ']').text(++x);
             var qty = +$('cquant[id=' + this.id + ']').text();
-            newcartItem = {
-                'id': this.id,
-                'quantity': (qty)
-            };
             // update cart table
-            cartRefresh(); // call of the function cartRefresh
+            $.post('/myapi/mycart/incrementCart', {id: this.id}, function (data)
+            {
+                cartRefresh(); // call of the function cartRefresh
+            });
         }
 
         if (this.name == "plus") { qtyIncrement(this.id); }
@@ -252,6 +253,7 @@ $(function()
             var cost = +$('price[id=' + this.id + ']').text();
             var amount = qty*cost;
             p = {
+                'id': this.id,
                 'name': name,
                 'price': cost,
                 'quantity': qty,
