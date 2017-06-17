@@ -38,10 +38,9 @@ db.sync({}); // executes db.define
 
 function getProducts () { return Product.findAll(); } // end of the function getProducts
 
-function addToCart (product)
+function addToCart (product) // definition of the function addToCart
 {
     Cart.findById(product.id).then(cartItem => {
-        console.log(product);
         cartItem.increment('quantity', {by: product.quantity});
         cartItem.increment('amount', {by: product.amount});
         return cartItem;
@@ -56,7 +55,7 @@ function addToCart (product)
         });
 } // end of the function addToCart
 
-function getCart()
+function getCart() // definition of the function getCart
 {
     if (Cart.findAll())
         return Cart.findAll();
@@ -64,23 +63,23 @@ function getCart()
         return 0;
 } // end of the function getCart
 
-function decrementCart(cartItemID)
+function decrementCart(cartItemID) // definition of the function decrementCart
 {
     Cart.findById(cartItemID).then(user => {
         user.decrement('quantity', {by: 1});
         user.decrement('amount', {by: user.price});
     })
-}
+} // end of the function decrementCart
 
-function incrementCart(cartItemID)
+function incrementCart(cartItemID) // definition of the function incrementCart
 {
     Cart.findById(cartItemID).then(user => {
         user.increment('quantity', {by: 1});
         user.increment('amount', {by: user.price});
     })    
-}
+} // end of the function incrementCart
 
-function noofproducts()
+function noofproducts() // definition of the function noofproducts
 {
     if(Cart.sum('quantity'))
         return Cart.sum('quantity');
@@ -88,24 +87,26 @@ function noofproducts()
         return 0;
 } // end of the function noofproducts
 
-function totalamount()
+function totalamount() // definition of the function totalamount
 {
     if(Cart.sum('amount'))
         return Cart.sum('amount');
     else
         return 0;
-}
+} // end of the function totalamount
 
 function cartCheckout(data) { Cart.destroy({ where: {}}); } // end of the function cartCheckout
 
-function delFromCart(cartItemID)
+function delFromCart(cartItemID) // definition of the function delFromCart
 {
-    return Cart.destroy({
-      where: {
-        id: cartItemID
-      }
+    return Cart.destroy(
+    {
+        where: 
+        {
+            id: cartItemID
+        }
     });
-}
+} // end of the function delFromCart
 
 module.exports = {
     getProducts,

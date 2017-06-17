@@ -56,4 +56,4 @@ var products = [
         }
 ]
 
-Product.create(products[5]);
+Product.create(products[0]);

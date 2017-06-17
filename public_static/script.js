@@ -7,7 +7,7 @@ $(function()
     
     function getNoOfProducts() { return (+$('#noOfProducts').text()); } // end of the function isCartEmpty
 
-    function setTotalCost(totalamount)
+    function setTotalCost(totalamount) // definition of the function setTotalCost
     {
         if (totalamount)
         {
@@ -25,7 +25,7 @@ $(function()
         }
     } // end of the function setTotalCost
 
-    function setNoOfProducts(value)
+    function setNoOfProducts(value) // definition of the function setNoOfProducts
     {
         if (value)
         {
@@ -43,8 +43,9 @@ $(function()
         }
     } // end of the function setNoOfProucts 
 
-    function updateCart()
+    function updateCart() // definition of the function updateCart
     {
+        // this function is used to update the cart
     	if (getNoOfProducts()) 
         {
     		if (!done) 
@@ -57,7 +58,7 @@ $(function()
     		}
     		var cart_body = $('#cartItemsBody');
     		cart_body.empty(); // to delete its elements
-            $.get('/myapi/mycart/getcart', function (items)
+            $.get('/myapi/mycart/getcart', function (items) // get cart items here
             {
                 if(items)
                 {
@@ -118,7 +119,7 @@ $(function()
         });
     } // end of the function cartRefresh
 
-    function setProductsTable(products)
+    function setProductsTable(products) // definition of the function setProductsTable
     {
         productBody = $('#productItemsBody');
         for(product of products)
@@ -134,15 +135,33 @@ $(function()
         setCartStyle(); // call of the function setCartStyle
     } // end of the function setProductsTable
 
-    function init()
+    function reset() // definition of the function reset
     {
+        no_of_products = 0;
+        total_cost = 0;
+        $('#totalCost').text(total_cost);
+        $('#noOfProducts').text(0);
+        for (var i = 1; i <= 6 ; i++)
+        {
+            $('quantity[id=' + i +']').text(1);
+        }
+        var cart_head = $('#cartItemsHead');
+        cart_head.empty(); // to remove the child elements
+        var cart_body = $('#cartItemsBody');
+        cart_body.empty(); // to remove the child elements
+        done = false;
+    } // end of the function reset
+
+    function init() // definition of the function init
+    {
+        // this is the first function that is called in this file
         $.get('/myapi/mycart/', function (data) 
         { 
-            setProductsTable(data);
+            setProductsTable(data); // call of the function setProductsTable
             cartRefresh(); // call of the function cartRefresh
             if(getNoOfProducts())
             {
-                reset();
+                reset(); // call of the function reset if the cart is empty
             }
             setCartStyle(); // set styles
         }); // call of the function setProductsTable
@@ -152,24 +171,7 @@ $(function()
     init(); // call of the function init
     // first function to be called in this script
 
-    function reset()
-    {
-        no_of_products = 0;
-        total_cost = 0;
-    	$('#totalCost').text(total_cost);
-    	$('#noOfProducts').text(0);
-    	for (var i = 1; i <= 6 ; i++)
-        {
-    		$('quantity[id=' + i +']').text(1);
-    	}
-    	var cart_head = $('#cartItemsHead');
-    	cart_head.empty(); // to remove the child elements
-    	var cart_body = $('#cartItemsBody');
-    	cart_body.empty(); // to remove the child elements
-    	done = false;
-    } // end of the function reset
-
-    function qtyDecrement(qty_id)
+    function qtyDecrement(qty_id) // definition of the function qtyDecrement
     {
     	if (($('quantity[id=' + qty_id + ']').text())>1) // Quantity can't be less than 1
         {
@@ -178,7 +180,7 @@ $(function()
     	}
     } // end of the function qtyDecrement
 
-    function qtyIncrement(qty_id)
+    function qtyIncrement(qty_id) // definition of the funtion qtyIncrement
     {
     	var x = +$('quantity[id=' + qty_id + ']').text();
     	$('quantity[id=' + qty_id + ']').text(++x);
@@ -213,7 +215,7 @@ $(function()
             }
         } // cminus button
 
-        if (this.name == "minus") { qtyDecrement(this.id); } 
+        if (this.name == "minus") { qtyDecrement(this.id); } // minus button
 
      });
 
@@ -229,9 +231,9 @@ $(function()
             {
                 cartRefresh(); // call of the function cartRefresh
             });
-        }
+        } // cplus button
 
-        if (this.name == "plus") { qtyIncrement(this.id); }
+        if (this.name == "plus") { qtyIncrement(this.id); } // plus button
      });
 
     $('body').on('click', '.blue' , function()
@@ -266,6 +268,6 @@ $(function()
                 setCartStyle(); // call of the function setCartStyle
             });
         }
-    })
+    }) // add-to-cart button
 
 }); // end of the script file
