@@ -5,7 +5,7 @@ const db = new Sequelize('test', 'root', 'root', {
     pool: {
         max: 5,
         min: 0,
-        idle: 5000
+        idle: 1000
     }
 });
 
@@ -75,7 +75,7 @@ function cartCheckout(data) { Cart.destroy({ where: {}}); } // end of the functi
 
 function delFromCart(cartItemID)
 {
-    Cart.destroy({
+    return Cart.destroy({
       where: {
         id: cartItemID
       }

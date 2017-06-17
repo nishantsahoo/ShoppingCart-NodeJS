@@ -19,6 +19,10 @@ $(function()
             total_cost = 0;
             $('#totalCost').text(0);        
         }
+        if ($('#totalCost').text()=="NaN")
+        {
+            $('#totalCost').text(0);
+        }
     } // end of the function setTotalCost
 
     function setNoOfProducts(value)
@@ -33,7 +37,10 @@ $(function()
             no_of_products = 0;
             $('#noOfProducts').text(no_of_products); 
         }
-        
+        if ($('#noOfProducts').text()=="NaN")
+        {
+            $('#noOfProducts').text(0);
+        }
     } // end of the function setNoOfProucts 
 
     function updateCart()
@@ -182,7 +189,7 @@ $(function()
     {
         if (this.name == "delCartItem")
         {
-    		$.get('/myapi/mycart/delfromcart', {id: this.id}, function (data)
+    		$.post('/myapi/mycart/delfromcart', {id: this.id}, function (data)
             {
                 cartRefresh(); // call of the function cartRefresh
                 if(!getNoOfProducts())

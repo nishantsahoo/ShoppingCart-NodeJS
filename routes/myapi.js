@@ -23,8 +23,9 @@ route.get('/getcart', (req, res) => {
     })
 });
 
-route.get('/delfromcart', (req, res) => {
+route.post('/delfromcart', (req, res) => {
     data.delFromCart(req.body.id);
+    res.redirect('/myapi/mycart');
 });
 
 route.get('/countproducts', (req, res) => {
